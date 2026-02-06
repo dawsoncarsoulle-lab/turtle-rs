@@ -14,4 +14,9 @@ impl Turtle {
             writing: true,
         }
     }
+
+    pub fn forward(&mut self, dist: f64) {
+        self.x += dist * (self.angle.to_radians()).cos();
+        self.y += dist * (self.angle.to_radians()).sin()
+    }
 }
