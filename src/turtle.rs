@@ -23,8 +23,9 @@ pub struct Turtle {
     point: Point,
     angle: f64,
     writing: bool,
-    lines: Vec<(Point, Point, Color)>,
+    lines: Vec<(Point, Point, Color, f64)>,
     color: Color,
+    width: f64,
 }
 
 impl Point {
@@ -45,6 +46,7 @@ impl Turtle {
             writing: true,
             lines: Vec::new(),
             color: Color::Black,
+            width: 2.0,
         }
     }
 
@@ -57,6 +59,7 @@ impl Turtle {
                 Point::new_point(x_start, y_start),
                 Point::new_point(self.point.point.0, self.point.point.1),
                 self.color,
+                self.width,
             ));
         }
     }
@@ -86,6 +89,10 @@ impl Turtle {
         self.color = color
     }
 
+    pub fn set_pen_width(&mut self, width: f64) {
+        self.width = width
+    }
+
     pub fn save_svg(&self, name: &str) -> std::io::Result<()> {
         let mut f = File::create(name)?;
 
@@ -94,11 +101,11 @@ impl Turtle {
             r#"<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">"#
         )?;
 
-        for (start, end, color) in &self.lines {
+        for (start, end, color, width) in &self.lines {
             writeln!(
                 f,
-                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{:?}" stroke-width="2" />"#,
-                start.point.0, start.point.1, end.point.0, end.point.1, color
+                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{:?}" stroke-width="{}" />"#,
+                start.point.0, start.point.1, end.point.0, end.point.1, color, width
             )?;
         }
 
