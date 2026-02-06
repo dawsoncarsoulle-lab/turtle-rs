@@ -46,6 +46,11 @@ impl Turtle {
         }
     }
 
+    pub fn goto(&mut self, x: f64, y: f64) {
+        self.point.point.0 = x;
+        self.point.point.1 = y;
+    }
+
     pub fn right(&mut self, angle: f64) {
         self.angle -= angle
     }
