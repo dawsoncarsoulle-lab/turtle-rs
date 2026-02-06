@@ -59,6 +59,14 @@ impl Turtle {
         self.angle += angle
     }
 
+    pub fn pen_up(&mut self) {
+        self.writing = false
+    }
+
+    pub fn pen_down(&mut self) {
+        self.writing = true
+    }
+
     pub fn save_svg(&self, name: &str) -> std::io::Result<()> {
         let mut f = File::create(name)?;
 
