@@ -19,4 +19,12 @@ impl Turtle {
         self.x += dist * (self.angle.to_radians()).cos();
         self.y += dist * (self.angle.to_radians()).sin()
     }
+
+    pub fn right(&mut self, angle: f64) {
+        self.angle -= angle
+    }
+
+    pub fn left(&mut self, angle: f64) {
+        self.angle += angle
+    }
 }
