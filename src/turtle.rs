@@ -3,6 +3,18 @@ use std::fs::File;
 use std::io::Write;
 
 #[derive(Clone, Copy, Debug)]
+pub enum Color {
+    Blue,
+    Red,
+    Purple,
+    Pink,
+    Orange,
+    Yellow,
+    Green,
+    Black,
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Point {
     point: (f64, f64),
 }
@@ -11,7 +23,8 @@ pub struct Turtle {
     point: Point,
     angle: f64,
     writing: bool,
-    lines: Vec<(Point, Point)>,
+    lines: Vec<(Point, Point, Color)>,
+    color: Color,
 }
 
 impl Point {
@@ -31,6 +44,7 @@ impl Turtle {
             angle: 0.0,
             writing: true,
             lines: Vec::new(),
+            color: Color::Black,
         }
     }
 
@@ -42,6 +56,7 @@ impl Turtle {
             self.lines.push((
                 Point::new_point(x_start, y_start),
                 Point::new_point(self.point.point.0, self.point.point.1),
+                self.color,
             ));
         }
     }
@@ -67,6 +82,10 @@ impl Turtle {
         self.writing = true
     }
 
+    pub fn set_color(&mut self, color: Color) {
+        self.color = color
+    }
+
     pub fn save_svg(&self, name: &str) -> std::io::Result<()> {
         let mut f = File::create(name)?;
 
@@ -75,11 +94,11 @@ impl Turtle {
             r#"<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">"#
         )?;
 
-        for (start, end) in &self.lines {
+        for (start, end, color) in &self.lines {
             writeln!(
                 f,
-                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="blue" stroke-width="2" />"#,
-                start.point.0, start.point.1, end.point.0, end.point.1
+                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{:?}" stroke-width="2" />"#,
+                start.point.0, start.point.1, end.point.0, end.point.1, color
             )?;
         }
 
