@@ -2,6 +2,7 @@ use std::f64;
 use std::fs::File;
 use std::io::Write;
 
+/// Represents the available pen colors.
 #[derive(Clone, Copy, Debug)]
 pub enum Color {
     Blue,
@@ -15,17 +16,21 @@ pub enum Color {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Point {
+struct Point {
     point: (f64, f64),
 }
 
-pub struct Line {
+struct Line {
     start: Point,
     end: Point,
     color: Color,
     width: f64,
 }
 
+/// The main Turtle structure.
+///
+/// It keeps track of its position, angle, pen state (up/down),
+/// and the list of lines drawn so far.
 pub struct Turtle {
     point: Point,
     angle: f64,
@@ -46,6 +51,8 @@ impl Point {
 }
 
 impl Turtle {
+    /// Creates a new turtle at the origin, facing right (0°),
+    /// with 2.0 width and a black stroke. The pen cannot writing.
     pub fn new() -> Turtle {
         Turtle {
             point: Point::new(),
@@ -57,6 +64,9 @@ impl Turtle {
         }
     }
 
+    /// Moves the turtle forward by a given distance.
+    ///
+    /// If the pen is down, a line segment is drawn.
     pub fn forward(&mut self, dist: f64) -> &mut Self {
         let start = self.point;
         self.point.point.0 += dist * (self.angle.to_radians()).cos();
@@ -72,6 +82,10 @@ impl Turtle {
         self
     }
 
+    /// Moves the turtle to an absolute position.
+    ///
+    /// If the pen is down, a line is drawn between the current
+    /// position and the target point.
     pub fn goto(&mut self, x: f64, y: f64) -> &mut Self {
         if self.writing {
             self.lines.push(Line {
@@ -86,36 +100,60 @@ impl Turtle {
         self
     }
 
+    /// Rotates the turtle clockwise by the given angle (in degrees).
     pub fn right(&mut self, angle: f64) -> &mut Self {
         self.angle -= angle;
         self
     }
 
+    /// Rotates the turtle counter-clockwise by the given angle (in degrees).
     pub fn left(&mut self, angle: f64) -> &mut Self {
         self.angle += angle;
         self
     }
 
+    /// Lifts the pen, preventing drawing while moving.
     pub fn pen_up(&mut self) -> &mut Self {
         self.writing = false;
         self
     }
 
+    /// Lowers the pen, enabling drawing.
     pub fn pen_down(&mut self) -> &mut Self {
         self.writing = true;
         self
     }
 
+    /// Sets the stroke color for subsequent lines.
     pub fn set_color(&mut self, color: Color) -> &mut Self {
         self.color = color;
         self
     }
 
+    /// Sets the stroke width for subsequent lines.
     pub fn set_pen_width(&mut self, width: f64) -> &mut Self {
         self.width = width;
         self
     }
 
+    /// Draws a parametric radial shape.
+    ///
+    /// The shape is generated in polar coordinates around the
+    /// turtle's current position.
+    ///
+    /// - `radius` defines the base radius
+    /// - `segments` controls angular resolution
+    /// - `deformation` modulates the radius per segment
+    ///
+    /// This method enables the creation of circles, stars,
+    /// flowers, spirals, and organic generative shapes.
+    ///
+    /// # Example
+    /// ```rust
+    /// t.shape(100.0, 360, |i| {
+    ///     (i as f64 * 0.1).sin().abs() + 1.0
+    /// });
+    /// ```
     pub fn shape<F>(&mut self, radius: f64, segments: usize, deformation: F) -> &mut Self
     where
         F: Fn(usize) -> f64,
@@ -140,11 +178,13 @@ impl Turtle {
         self
     }
 
+    /// Draws a circle using a radial approximation.
     pub fn circle(&mut self, radius: f64) -> &mut Self {
         self.shape(radius, 360, |_| 1.0);
         self
     }
 
+    /// Draws a square as a regular polygon inscribed in a circle.
     pub fn square(&mut self, size: f64) -> &mut Self {
         self.right(45.0);
         self.shape(1.0, 4, |_| 1.0 * size);
@@ -152,6 +192,7 @@ impl Turtle {
         self
     }
 
+    /// Draws a triangle as a regular polygon inscribed in a circle.
     pub fn triangle(&mut self, size: f64) -> &mut Self {
         self.right(90.0);
         self.shape(1.0, 3, |_| 1.0 * size);
@@ -159,6 +200,9 @@ impl Turtle {
         self
     }
 
+    /// Draws a star shape.
+    ///
+    /// `branch` must be greater than or equal to 3.
     pub fn star(&mut self, size: f64, branch: usize) -> &mut Self {
         if branch * 2 < 6 {
             println!("error : the number of branch must be superior or equal to 3");
@@ -176,6 +220,10 @@ impl Turtle {
         self
     }
 
+    /// Saves the drawing as an SVG file.
+    ///
+    /// # Errors
+    /// Returns an `io::Error` if the file cannot be written.
     pub fn save_svg(&self, name: &str) -> std::io::Result<()> {
         let mut f = File::create(name)?;
 
@@ -198,7 +246,6 @@ impl Turtle {
         }
 
         writeln!(f, r#"</svg>"#)?;
-        println!("succes");
         Ok(())
     }
 }
