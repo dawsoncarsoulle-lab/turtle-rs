@@ -166,7 +166,11 @@ impl Turtle {
         }
         self.right(90.0);
         self.shape(1.0, branch * 2, |i| {
-            if i % 2 == 0 { 1.0 * size } else { 0.4 * size }
+            if i % 2 == 0 {
+                1.0 * size
+            } else {
+                0.4 * size
+            }
         });
         self.left(90.0);
         self

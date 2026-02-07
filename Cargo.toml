@@ -1,8 +1,10 @@
 [package]
 name = "turtle_rs"
 authors = ["Carsoulle Dawson dawsoncarsoulle@gmail.com"]
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "A lightweight, SVG-based Turtle graphics implementation for Rust, inspired by Python's turtle module."
 license = "MIT"
 repository = "https://github.com/dawsoncarsoulle-lab/turtle-rs"
+keywords = ["graphics", "turtle", "svg", "drawing"]
+categories = ["graphics", "visualization"]
