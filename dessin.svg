@@ -1,10 +1,6 @@
 <svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
-  <line x1="500" y1="500" x2="550" y2="500" stroke="Green" stroke-width="2" />
-  <line x1="550" y1="500" x2="600" y2="500" stroke="Blue" stroke-width="2" />
-  <line x1="600" y1="500" x2="650" y2="500" stroke="Green" stroke-width="6" />
-  <line x1="650" y1="500" x2="700" y2="500" stroke="Blue" stroke-width="6" />
-  <line x1="700" y1="500" x2="750" y2="500" stroke="Green" stroke-width="10" />
-  <line x1="750" y1="500" x2="800" y2="500" stroke="Blue" stroke-width="10" />
-  <line x1="800" y1="500" x2="850" y2="500" stroke="Green" stroke-width="14" />
-  <line x1="850" y1="500" x2="900" y2="500" stroke="Blue" stroke-width="14" />
+  <line x1="500" y1="500" x2="550" y2="500" stroke="Black" stroke-width="2" />
+  <line x1="550" y1="500" x2="600" y2="500" stroke="Purple" stroke-width="6" />
+  <line x1="600" y1="500" x2="650" y2="500" stroke="Purple" stroke-width="10" />
+  <line x1="650" y1="500" x2="700" y2="500" stroke="Purple" stroke-width="14" />
 </svg>
