@@ -54,10 +54,10 @@ fn main() {
 
     t.set_color(Color::Red)
      .set_pen_width(2.0)
-     .forward(100.0);
-     .right(120.0);
-     .forward(100.0);
-     .right(120.0);
+     .forward(100.0)
+     .right(120.0)
+     .forward(100.0)
+     .right(120.0)
      .forward(100.0)
      .save_svg("drawing.svg");
 }
