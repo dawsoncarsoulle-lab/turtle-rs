@@ -98,6 +98,15 @@ This allows the creation of:
 - organic blobs
 - custom generative shapes
 
+### Using Custom Colors
+
+You are not limited to standard colors! You can use any RGB combination:
+
+```rust
+// Create a custom grey color
+t.set_custom_color((159, 159, 159));
+
+
 ## Coordinate System
 
 The turtle starts at the top left corner of the canvas `(0, 0)`.
@@ -113,3 +122,4 @@ Contributions are welcome! Feel free to open an Issue or a Pull Request on the r
 ## License
 
 This project is licensed under the MIT License.
+```
