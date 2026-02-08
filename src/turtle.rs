@@ -13,6 +13,7 @@ pub enum Color {
     Yellow,
     Green,
     Black,
+    Custom(u8, u8, u8),
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -38,6 +39,24 @@ pub struct Turtle {
     lines: Vec<Line>,
     color: Color,
     width: f64,
+}
+
+impl Color {
+    fn to_svg(&self) -> String {
+        match self {
+            Color::Custom(r, g, b) => {
+                format!("rgb({}, {}, {})", r, g, b)
+            }
+            Color::Yellow => "Yellow".to_string(),
+            Color::Blue => "Blue".to_string(),
+            Color::Green => "Green".to_string(),
+            Color::Orange => "Orange".to_string(),
+            Color::Pink => "Pink".to_string(),
+            Color::Purple => "Purple".to_string(),
+            Color::Red => "Red".to_string(),
+            _ => "Black".to_string(),
+        }
+    }
 }
 
 impl Point {
@@ -127,6 +146,16 @@ impl Turtle {
     /// Sets the stroke color for subsequent lines.
     pub fn set_color(&mut self, color: Color) -> &mut Self {
         self.color = color;
+        self
+    }
+
+    /// Sets a custom RGB color for the pen.
+    /// # Example
+    /// ```
+    /// t.set_custom_color((159, 159, 159));
+    /// ```
+    pub fn set_custom_color(&mut self, rgb: (u8, u8, u8)) -> &mut Self {
+        self.color = Color::Custom(rgb.0, rgb.1, rgb.2);
         self
     }
 
@@ -235,12 +264,12 @@ impl Turtle {
         for line in &self.lines {
             writeln!(
                 f,
-                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{:?}" stroke-width="{}" />"#,
+                r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{}" stroke-width="{}" />"#,
                 line.start.point.0,
                 line.start.point.1,
                 line.end.point.0,
                 line.end.point.1,
-                line.color,
+                line.color.to_svg(),
                 line.width
             )?;
         }
