@@ -101,6 +101,14 @@ impl Turtle {
         self
     }
 
+    /// Moves the turtle backward by a given distance.
+    ///
+    /// If the pen is down, a line segment is drawn.
+    pub fn backward(&mut self, dist: f64) -> &mut Self {
+        self.forward(-dist);
+        self
+    }
+
     /// Moves the turtle to an absolute position.
     ///
     /// If the pen is down, a line is drawn between the current
@@ -116,6 +124,15 @@ impl Turtle {
         }
         self.point.point.0 = x;
         self.point.point.1 = y;
+        self
+    }
+
+    /// Moves the turtle to an absolute position.
+    ///
+    /// If the pen is down, a line is not drawn between the current
+    /// position and the target point.
+    pub fn teleport(&mut self, x: f64, y: f64) -> &mut Self {
+        self.point.point = (x, y);
         self
     }
 
@@ -162,6 +179,83 @@ impl Turtle {
     /// Sets the stroke width for subsequent lines.
     pub fn set_pen_width(&mut self, width: f64) -> &mut Self {
         self.width = width;
+        self
+    }
+
+    /// Sets the x-coordinate of the turtle's position.
+    pub fn set_x(&mut self, x: f64) -> &mut Self {
+        self.point.point.0 = x;
+        self
+    }
+
+    /// Sets the y-coordinate of the turtle's position.
+    pub fn set_y(&mut self, y: f64) -> &mut Self {
+        self.point.point.1 = y;
+        self
+    }
+
+    /// Returns whether the pen is currently down.
+    pub fn pen_is_down(&self) -> bool {
+        self.writing
+    }
+
+    /// Returns the current position of the turtle.
+    pub fn position(&self) -> (f64, f64) {
+        (self.point.point.0, self.point.point.1)
+    }
+
+    /// Returns the current x-coordinate of the turtle.
+    pub fn x_cor(&self) -> f64 {
+        self.point.point.0
+    }
+
+    /// Returns the current y-coordinate of the turtle.
+    pub fn y_cor(&self) -> f64 {
+        self.point.point.1
+    }
+
+    /// Returns the current heading (orientation) of the turtle in degrees.
+    pub fn heading(&self) -> f64 {
+        self.angle
+    }
+
+    /// Calculates the Euclidean distance between the turtle and a target point.
+    pub fn distance(&self, x: f64, y: f64) -> f64 {
+        ((self.y_cor() - y).powf(2.0) + (self.x_cor() - x).powf(2.0)).sqrt()
+    }
+
+    /// Calculates the angle from the turtle's current position to a target point.
+    ///
+    /// Returns the heading (in degrees) that the turtle would need to face
+    /// in order to point directly at the given coordinates.
+    ///
+    /// The angle is measured clockwise from the positive x-axis (East):
+    /// - 0° = East
+    /// - 90° = North
+    /// - 180° or -180° = West
+    /// - -90° = South
+    pub fn toward(&self, x: f64, y: f64) -> f64 {
+        let dx = x - self.x_cor();
+        let dy = y - self.y_cor();
+        dy.atan2(dx).to_degrees()
+    }
+
+    /// Sets the turtle's heading to an absolute angle.
+    ///
+    /// Unlike [`left`](Self::left) and [`right`](Self::right), which rotate
+    /// relative to the current heading, this method sets the heading directly.
+    pub fn absolute_orientation(&mut self, angle: f64) -> &mut Self {
+        self.angle = angle;
+        self
+    }
+
+    /// Orients the turtle to face toward a target point.
+    ///
+    /// This is a convenience method that combines [`toward`](Self::toward)
+    /// and [`absolute_orientation`](Self::absolute_orientation).
+    /// The turtle's position does not change.
+    pub fn face_toward(&mut self, x: f64, y: f64) -> &mut Self {
+        self.angle = self.toward(x, y);
         self
     }
 
