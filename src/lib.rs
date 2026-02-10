@@ -27,7 +27,7 @@
 //!  .save_svg("example.svg");
 //! ```
 
-mod turtle;
+pub mod turtle;
+pub mod util;
 
-pub use turtle::Color;
-pub use turtle::Turtle;
+

@@ -2,84 +2,38 @@ use std::f64;
 use std::fs::File;
 use std::io::Write;
 
-/// Represents the available pen colors.
-#[derive(Clone, Copy, Debug)]
-pub enum Color {
-    Blue,
-    Red,
-    Purple,
-    Pink,
-    Orange,
-    Yellow,
-    Green,
-    Black,
-    Custom(u8, u8, u8),
-}
-
-#[derive(Clone, Copy, Debug)]
-struct Point {
-    point: (f64, f64),
-}
-
-struct Line {
-    start: Point,
-    end: Point,
-    color: Color,
-    width: f64,
-}
+use crate::util::*;
 
 /// The main Turtle structure.
 ///
 /// It keeps track of its position, angle, pen state (up/down),
 /// and the list of lines drawn so far.
 pub struct Turtle {
-    point: Point,
-    angle: f64,
-    writing: bool,
+    pub position: Point,
+    pub angle: f64,
+    pub writing: bool,
     lines: Vec<Line>,
-    color: Color,
-    width: f64,
-}
-
-impl Color {
-    fn to_svg(&self) -> String {
-        match self {
-            Color::Custom(r, g, b) => {
-                format!("rgb({}, {}, {})", r, g, b)
-            }
-            Color::Yellow => "Yellow".to_string(),
-            Color::Blue => "Blue".to_string(),
-            Color::Green => "Green".to_string(),
-            Color::Orange => "Orange".to_string(),
-            Color::Pink => "Pink".to_string(),
-            Color::Purple => "Purple".to_string(),
-            Color::Red => "Red".to_string(),
-            _ => "Black".to_string(),
-        }
-    }
-}
-
-impl Point {
-    pub fn new() -> Point {
-        Point { point: (0.0, 0.0) }
-    }
-
-    pub fn new_point(x: f64, y: f64) -> Point {
-        Point { point: (x, y) }
-    }
+    pub color: Color,
+    pub width: f64,
 }
 
 impl Turtle {
+    const DEFAULT_ANGLE: f64 = 0.0;
+    const DEFAULT_WRITING_STATE: bool = false;
+    const DEFAULT_COLOR: Color = Color::Black;
+    const DEFAULT_LINE_WIDTH: f64 = 2.0;
+    const DEFAULT_INITIAL_POINT: Point = Point { x: 0.0, y: 0.0 };
+
     /// Creates a new turtle at the origin, facing right (0°),
     /// with 2.0 width and a black stroke. The pen cannot writing.
     pub fn new() -> Turtle {
         Turtle {
-            point: Point::new(),
-            angle: 0.0,
-            writing: false,
+            position: Turtle::DEFAULT_INITIAL_POINT,
+            angle: Turtle::DEFAULT_ANGLE,
+            writing: Turtle::DEFAULT_WRITING_STATE,
             lines: Vec::new(),
-            color: Color::Black,
-            width: 2.0,
+            color: Turtle::DEFAULT_COLOR,
+            width: Turtle::DEFAULT_LINE_WIDTH,
         }
     }
 
@@ -87,13 +41,16 @@ impl Turtle {
     ///
     /// If the pen is down, a line segment is drawn.
     pub fn forward(&mut self, dist: f64) -> &mut Self {
-        let start = self.point;
-        self.point.point.0 += dist * (self.angle.to_radians()).cos();
-        self.point.point.1 += dist * (self.angle.to_radians()).sin();
+        let start = self.position;
+
+        let (sin, cos) = self.angle.to_radians().sin_cos();
+        self.position.x += dist * cos;
+        self.position.y += dist * sin;
+
         if self.writing {
             self.lines.push(Line {
                 start: start,
-                end: self.point,
+                end: self.position,
                 color: self.color,
                 width: self.width,
             });
@@ -116,14 +73,13 @@ impl Turtle {
     pub fn goto(&mut self, x: f64, y: f64) -> &mut Self {
         if self.writing {
             self.lines.push(Line {
-                start: self.point,
-                end: Point::new_point(x, y),
+                start: self.position,
+                end: Point { x, y },
                 color: self.color,
                 width: self.width,
             });
         }
-        self.point.point.0 = x;
-        self.point.point.1 = y;
+        self.position = Point { x, y };
         self
     }
 
@@ -131,8 +87,8 @@ impl Turtle {
     ///
     /// If the pen is down, a line is not drawn between the current
     /// position and the target point.
-    pub fn teleport(&mut self, x: f64, y: f64) -> &mut Self {
-        self.point.point = (x, y);
+    pub fn teleport_to(&mut self, x: f64, y: f64) -> &mut Self {
+        self.position = Point { x, y };
         self
     }
 
@@ -160,37 +116,24 @@ impl Turtle {
         self
     }
 
-    /// Sets the stroke color for subsequent lines.
-    pub fn set_color(&mut self, color: Color) -> &mut Self {
-        self.color = color;
-        self
-    }
-
     /// Sets a custom RGB color for the pen.
     /// # Example
     /// ```
     /// t.set_custom_color((159, 159, 159));
     /// ```
-    pub fn set_custom_color(&mut self, rgb: (u8, u8, u8)) -> &mut Self {
-        self.color = Color::Custom(rgb.0, rgb.1, rgb.2);
+    pub fn with_color_custom(&mut self, red: u8, green: u8, blue: u8) -> &mut Self {
+        self.color = Color::Custom(red, green, blue);
+        self
+    }
+
+    pub fn with_color(&mut self, color: Color) -> &mut Self {
+        self.color = color;
         self
     }
 
     /// Sets the stroke width for subsequent lines.
-    pub fn set_pen_width(&mut self, width: f64) -> &mut Self {
+    pub fn with_pen_width(&mut self, width: f64) -> &mut Self {
         self.width = width;
-        self
-    }
-
-    /// Sets the x-coordinate of the turtle's position.
-    pub fn set_x(&mut self, x: f64) -> &mut Self {
-        self.point.point.0 = x;
-        self
-    }
-
-    /// Sets the y-coordinate of the turtle's position.
-    pub fn set_y(&mut self, y: f64) -> &mut Self {
-        self.point.point.1 = y;
         self
     }
 
@@ -199,29 +142,9 @@ impl Turtle {
         self.writing
     }
 
-    /// Returns the current position of the turtle.
-    pub fn position(&self) -> (f64, f64) {
-        (self.point.point.0, self.point.point.1)
-    }
-
-    /// Returns the current x-coordinate of the turtle.
-    pub fn x_cor(&self) -> f64 {
-        self.point.point.0
-    }
-
-    /// Returns the current y-coordinate of the turtle.
-    pub fn y_cor(&self) -> f64 {
-        self.point.point.1
-    }
-
-    /// Returns the current heading (orientation) of the turtle in degrees.
-    pub fn heading(&self) -> f64 {
-        self.angle
-    }
-
     /// Calculates the Euclidean distance between the turtle and a target point.
-    pub fn distance(&self, x: f64, y: f64) -> f64 {
-        ((self.y_cor() - y).powf(2.0) + (self.x_cor() - x).powf(2.0)).sqrt()
+    pub fn distance_to(&self, x: f64, y: f64) -> f64 {
+        (self.position.x - x).hypot(self.position.y - y)
     }
 
     /// Calculates the angle from the turtle's current position to a target point.
@@ -234,9 +157,9 @@ impl Turtle {
     /// - 90° = North
     /// - 180° or -180° = West
     /// - -90° = South
-    pub fn toward(&self, x: f64, y: f64) -> f64 {
-        let dx = x - self.x_cor();
-        let dy = y - self.y_cor();
+    pub fn towards(&self, x: f64, y: f64) -> f64 {
+        let dx = x - self.position.x;
+        let dy = y - self.position.y;
         dy.atan2(dx).to_degrees()
     }
 
@@ -255,7 +178,7 @@ impl Turtle {
     /// and [`absolute_orientation`](Self::absolute_orientation).
     /// The turtle's position does not change.
     pub fn face_toward(&mut self, x: f64, y: f64) -> &mut Self {
-        self.angle = self.toward(x, y);
+        self.angle = self.towards(x, y);
         self
     }
 
@@ -281,65 +204,32 @@ impl Turtle {
     where
         F: Fn(usize) -> f64,
     {
-        let (cx, cy) = self.point.point;
-        let angle_0: f64 = self.angle;
-        let radius_0 = radius * deformation(0);
-        let x_0 = cx + radius_0 * angle_0.to_radians().cos();
-        let y_0 = cy + radius_0 * angle_0.to_radians().sin();
+        assert!(segments > 0, "Segment count cannot be 0");
 
-        self.pen_up();
-        self.goto(x_0, y_0);
-        self.pen_down();
-        for i in 1..=segments {
-            let angle = i as f64 * (360.0 / segments as f64) + self.angle;
-            let actual_radius = radius * deformation(i % segments);
-            let target_x = cx + actual_radius * angle.to_radians().cos();
-            let target_y = cy + actual_radius * angle.to_radians().sin();
-            self.goto(target_x, target_y);
-        }
-        self.pen_up();
-        self
-    }
+        let initial_point = self.position;
+        let initial_angle = self.angle;
 
-    /// Draws a circle using a radial approximation.
-    pub fn circle(&mut self, radius: f64) -> &mut Self {
-        self.shape(radius, 360, |_| 1.0);
-        self
-    }
+        let mut coordinates = (0..=segments).map(|i| {
+            let angle = i as f64 * (360.0 / segments as f64) + initial_angle;
+            let step_radius = radius * deformation(i % segments); // implicit deformation(0), assert needed
 
-    /// Draws a square as a regular polygon inscribed in a circle.
-    pub fn square(&mut self, size: f64) -> &mut Self {
-        self.right(45.0);
-        self.shape(1.0, 4, |_| 1.0 * size);
-        self.left(45.0);
-        self
-    }
+            let (sin, cos) = angle.to_radians().sin_cos();
+            let current_x = initial_point.x + step_radius * cos;
+            let current_y = initial_point.y + step_radius * sin;
 
-    /// Draws a triangle as a regular polygon inscribed in a circle.
-    pub fn triangle(&mut self, size: f64) -> &mut Self {
-        self.right(90.0);
-        self.shape(1.0, 3, |_| 1.0 * size);
-        self.left(90.0);
-        self
-    }
-
-    /// Draws a star shape.
-    ///
-    /// `branch` must be greater than or equal to 3.
-    pub fn star(&mut self, size: f64, branch: usize) -> &mut Self {
-        if branch * 2 < 6 {
-            println!("error : the number of branch must be superior or equal to 3");
-            return self;
-        }
-        self.right(90.0);
-        self.shape(1.0, branch * 2, |i| {
-            if i % 2 == 0 {
-                1.0 * size
-            } else {
-                0.4 * size
-            }
+            (current_x, current_y)
         });
-        self.left(90.0);
+
+        if let Some((initial_x, initial_y)) = coordinates.next() {
+            self.teleport_to(initial_x, initial_y);
+        } else {
+            unsafe { std::hint::unreachable_unchecked() } // will have one element
+        }
+
+        for (x, y) in coordinates.into_iter() {
+            let _ = self.goto(x, y);
+        }
+
         self
     }
 
@@ -347,28 +237,28 @@ impl Turtle {
     ///
     /// # Errors
     /// Returns an `io::Error` if the file cannot be written.
-    pub fn save_svg(&self, name: &str) -> std::io::Result<()> {
+    pub fn save_svg(&self, name: &str) -> std::io::Result<File> {
         let mut f = File::create(name)?;
 
         writeln!(
             f,
-            r#"<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">"#
+            r#"<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">"# // hardcoded dimensions...
         )?;
 
         for line in &self.lines {
             writeln!(
                 f,
                 r#"  <line x1="{}" y1="{}" x2="{}" y2="{}" stroke="{}" stroke-width="{}" />"#,
-                line.start.point.0,
-                line.start.point.1,
-                line.end.point.0,
-                line.end.point.1,
+                line.start.x,
+                line.start.y,
+                line.end.x,
+                line.end.y,
                 line.color.to_svg(),
                 line.width
             )?;
         }
 
         writeln!(f, r#"</svg>"#)?;
-        Ok(())
+        Ok(f)
     }
 }
